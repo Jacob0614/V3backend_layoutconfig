@@ -1,0 +1,22 @@
+{
+  "configCenter": "配置中心",
+  "systemConfig": "系統配置",
+  "layoutConfig": "版面配置",
+  "layoutConfigEdit": "首頁模板配置",
+  "fullScreen": "全螢幕",
+  "header": {
+    "tenant": "商戶",
+    "switchTenant": "切換",
+    "timezone": "Asia/Yerevan"
+  },
+  "main": {
+    "members": "會員管理",
+    "operations": "營運管理",
+    "finance": "財務管理",
+    "games": "遊戲管理",
+    "config": "配置中心",
+    "report": "報表管理",
+    "risk": "風控管理",
+    "system": "系統管理"
+  }
+}

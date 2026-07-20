@@ -1,0 +1,22 @@
+{
+  "configCenter": "Configuration Center",
+  "systemConfig": "System Configuration",
+  "layoutConfig": "Layout Configuration",
+  "layoutConfigEdit": "Homepage Template Configuration",
+  "fullScreen": "Fullscreen",
+  "header": {
+    "tenant": "Tenant",
+    "switchTenant": "Switch",
+    "timezone": "Asia/Yerevan"
+  },
+  "main": {
+    "members": "Member Management",
+    "operations": "Operations",
+    "finance": "Finance",
+    "games": "Game Management",
+    "config": "Configuration Center",
+    "report": "Reports",
+    "risk": "Risk Control",
+    "system": "System Management"
+  }
+}
