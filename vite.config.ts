@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import { resolve } from 'node:path';
 
 export default defineConfig({
-  base: '/',
+  base: process.env.GITHUB_ACTIONS === 'true' ? '/V3backend_layoutconfig/' : '/',
   resolve: {
     alias: {
       '@': resolve(process.cwd(), 'src'),
