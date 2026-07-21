@@ -12,22 +12,9 @@
     ]"
     :style="wireframeStyle"
   >
-    <div v-if="module.type === 'games' && gameVenueGroups.length" class="fc-wire-game-venue-nav">
-      <div class="fc-wire-game-venue-tabs">
-        <span v-for="(venue, index) in gameVenueGroups" :key="venue.id" :class="{ active: index === 0 }">{{ venue.name }}</span>
-      </div>
-      <div class="fc-wire-game-sub-tabs">
-        <span v-for="(section, index) in gameVenueGroups[0]?.subcategories || []" :key="section.id" :class="[gameSectionClass(section), { active: index === 0 }]">
-          <img v-if="section.iconVisible && section.iconSource" :src="section.iconSource" alt="" />
-          <i v-else-if="section.iconVisible" />
-          <b>{{ section.name }}</b>
-        </span>
-      </div>
-    </div>
-
     <div v-if="module.type === 'topNav' && /^(dualAuth|wideLogo|topnav0[1-7])$/.test(module.variant)" class="fc-wire-topnav-form" :class="[`fc-wire-topnav-form--${module.variant}`, { 'fc-wire-topnav-form--auth-bar': module.showAuthBar || module.variant === 'topnav04' }]" aria-label="頂部導航框架">
       <img
-        v-if="module.referenceAsset && platform !== 'desktop' && fidelity !== 'low'"
+        v-if="module.referenceAsset && platform !== 'desktop'"
         class="fc-wire-topnav-reference"
         :src="module.referenceAsset"
         alt=""
@@ -254,28 +241,57 @@
       <span class="fc-wire-notice-more">更多</span>
     </div>
 
+    <div v-else-if="module.type === 'category' && module.variant === 'list'" class="fc-wire-category fc-wire-category--list">
+      <div class="fc-wire-category-items">
+        <span v-for="venue in venueEntries.slice(0, 4)" :key="venue.id"><i v-if="module.iconVisible !== false" /><b>{{ venue.name }}</b></span>
+      </div>
+    </div>
+
+    <div v-else-if="module.type === 'category' && module.variant === 'blueMenu'" class="fc-wire-category fc-wire-category--blue-menu">
+      <div class="fc-wire-blue-menu-row fc-wire-blue-menu-row--top">
+        <span v-for="index in 2" :key="`blue-top-${index}`"><i v-if="module.iconVisible !== false" /><b>{{ venueNameAt(index - 1) }}</b></span>
+      </div>
+      <div v-for="row in 2" :key="`blue-row-${row}`" class="fc-wire-blue-menu-row">
+        <span v-for="index in 3" :key="`blue-${row}-${index}`"><i v-if="module.iconVisible !== false" /><b>{{ venueNameAt((row - 1) * 3 + index + 1) }}</b></span>
+      </div>
+    </div>
+
+    <div v-else-if="module.type === 'category' && module.variant === 'containerMenu'" class="fc-wire-category fc-wire-category--container-menu">
+      <div class="fc-wire-category-panels">
+        <span v-for="index in 3" :key="`container-${index}`"><i v-if="module.iconVisible !== false" /><b>{{ venueNameAt(index - 1) }}</b></span>
+      </div>
+    </div>
+
+    <div v-else-if="module.type === 'category' && module.variant === 'red92Menu'" class="fc-wire-category fc-wire-category--red92-menu">
+      <div class="fc-wire-red92-menu-grid">
+        <span v-for="index in 8" :key="`red92-${index}`"><i v-if="module.iconVisible !== false" /><b>{{ venueNameAt(index - 1) }}</b></span>
+      </div>
+    </div>
+
+    <div v-else-if="module.type === 'category' && module.variant === 'tabs'" class="fc-wire-category fc-wire-category--tabs">
+      <div class="fc-wire-tabs">
+        <span v-for="(section, index) in gameSections.slice(0, 6)" :key="section.id" :class="{ active: index === 0 }">{{ section.name }}</span>
+      </div>
+    </div>
+
+    <div v-else-if="module.type === 'category' && module.variant === 'menuItem'" class="fc-wire-category fc-wire-category--menu-item">
+      <div class="fc-wire-menu-grid">
+        <span v-for="index in 8" :key="`menu-${index}`"><i v-if="module.iconVisible !== false" /><b>{{ venueNameAt(index - 1) }}</b></span>
+      </div>
+    </div>
+
+    <div v-else-if="module.type === 'category' && module.variant === 'scene'" class="fc-wire-category fc-wire-category--scene">
+      <div class="fc-wire-scenes">
+        <span v-for="index in 4" :key="`scene-${index}`"><i v-if="module.iconVisible !== false" /><b>{{ venueNameAt(index - 1, '場館') }}</b></span>
+      </div>
+    </div>
+
     <div v-else-if="module.type === 'category'" class="fc-wire-category fc-wire-category--venue">
       <div class="fc-wire-venue-entry-list">
         <span v-for="venue in venueEntries" :key="venue.id">
           <i v-if="module.iconVisible !== false" />
           <b>{{ venue.name }}</b>
         </span>
-      </div>
-    </div>
-
-    <div v-else-if="module.type === 'games' && gameVenueGroups.length" class="fc-wire-games fc-wire-games--venue">
-      <div class="fc-wire-game-venue-section">
-        <div class="fc-wire-section-title"><strong>{{ gameVenueGroups[0].name }}</strong><span /></div>
-        <div v-for="section in gameVenueGroups[0].subcategories" :key="section.id" class="fc-wire-game-subsection">
-          <div class="fc-wire-game-subsection-title" :class="gameSectionClass(section)">
-              <i v-if="section.iconVisible" />
-              <strong>{{ section.name }}</strong>
-              <span />
-          </div>
-          <div class="fc-wire-game-grid">
-            <span v-for="index in gameCardCount(section, cardCount)" :key="`${gameVenueGroups[0].id}-${section.id}-${index}`" class="fc-wire-game-card"><i /></span>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -782,6 +798,9 @@ function gameCardCount(section: GameSection | undefined, fallback: number) {
 }
 function gameSectionClass(section: GameSection) {
   return [`fc-wire-game-title--${section.displayMode}`, { 'fc-wire-game-title--no-icon': !section.iconVisible }];
+}
+function venueNameAt(index: number, fallback = '入口') {
+  return venueEntries.value[index]?.name || fallback;
 }
 
 // 保留多列內容，讓畫布能以實際首頁方式上下滾動；每端的欄數仍依規格維持 7／3 張。
