@@ -25,32 +25,28 @@
           <template #header>
             <div class="p0b-card-header">
               <strong>H5 前台預覽</strong>
-              <n-space size="small" align="center">
-                <span class="p0b-muted">375 × 812</span>
-                <n-button
-                  v-for="state in authStates"
-                  :key="state.value"
-                  size="tiny"
-                  :type="previewAuthState === state.value ? 'primary' : 'default'"
-                  @click="previewAuthState = state.value"
-                >{{ state.label }}</n-button>
-              </n-space>
+              <span class="p0b-muted">兩種狀態／375 × 812</span>
             </div>
           </template>
-          <div class="p0b-phone-wrap">
-            <div ref="previewFrameRef" class="p0b-phone-frame">
-              <div class="p0b-phone" :style="previewPhoneStyle">
-              <div class="p0b-phone-scroll">
-                <div v-for="module in previewModules" :key="module.id" class="p0b-source-module" :class="`p0b-source-module--${module.type}`">
-                  <ModuleWireframe :module="module" platform="mobile" :template-id="selectedTemplateId" :auth-state="previewAuthState" fidelity="low" />
+          <div ref="previewFrameRef" class="p0b-phone-wrap">
+            <div class="p0b-state-grid">
+              <div v-for="state in authStates" :key="state.value" class="p0b-state-preview">
+                <div class="p0b-state-label">{{ state.label }}</div>
+                <div class="p0b-phone-frame" :style="previewFrameStyle">
+                  <div class="p0b-phone" :style="previewPhoneStyle">
+                    <div class="p0b-phone-scroll">
+                      <div v-for="module in previewModules" :key="`${state.value}-${module.id}`" class="p0b-source-module" :class="`p0b-source-module--${module.type}`">
+                        <ModuleWireframe :module="module" platform="mobile" :template-id="selectedTemplateId" :auth-state="state.value" fidelity="low" />
+                      </div>
+                    </div>
+                    <div class="p0b-phone-floating">
+                      <ModuleWireframe :module="floatingPreviewModule" platform="mobile" :template-id="selectedTemplateId" :auth-state="state.value" fidelity="low" />
+                    </div>
+                    <div class="p0b-phone-fixed-bottom">
+                      <ModuleWireframe :module="bottomNavPreviewModule" platform="mobile" :template-id="selectedTemplateId" :auth-state="state.value" fidelity="low" />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="p0b-phone-floating">
-                <ModuleWireframe :module="floatingPreviewModule" platform="mobile" :template-id="selectedTemplateId" :auth-state="previewAuthState" fidelity="low" />
-              </div>
-              <div class="p0b-phone-fixed-bottom">
-                <ModuleWireframe :module="bottomNavPreviewModule" platform="mobile" :template-id="selectedTemplateId" :auth-state="previewAuthState" fidelity="low" />
-              </div>
               </div>
             </div>
           </div>
@@ -157,20 +153,25 @@
       </template>
     </n-modal>
 
-    <n-modal v-model:show="previewVisible" preset="card" title="H5前台預覽" style="width: 430px">
+    <n-modal v-model:show="previewVisible" preset="card" title="H5前台預覽" style="width: min(820px, calc(100vw - 32px))">
       <div class="p0b-modal-preview">
-          <div class="p0b-phone-frame p0b-phone-frame--modal">
-          <div class="p0b-phone" :style="modalPhoneStyle">
-            <div class="p0b-phone-scroll">
-              <div v-for="module in previewModules" :key="module.id" class="p0b-source-module" :class="`p0b-source-module--${module.type}`">
-                <ModuleWireframe :module="module" platform="mobile" :template-id="selectedTemplateId" :auth-state="previewAuthState" fidelity="high" />
+        <div class="p0b-modal-state-grid">
+          <div v-for="state in authStates" :key="state.value" class="p0b-state-preview">
+            <div class="p0b-state-label">{{ state.label }}</div>
+            <div class="p0b-phone-frame p0b-phone-frame--modal">
+              <div class="p0b-phone" :style="modalPhoneStyle">
+                <div class="p0b-phone-scroll">
+                  <div v-for="module in previewModules" :key="`${state.value}-${module.id}`" class="p0b-source-module" :class="`p0b-source-module--${module.type}`">
+                    <ModuleWireframe :module="module" platform="mobile" :template-id="selectedTemplateId" :auth-state="state.value" fidelity="high" />
+                  </div>
+                </div>
+                <div class="p0b-phone-floating">
+                  <ModuleWireframe :module="floatingPreviewModule" platform="mobile" :template-id="selectedTemplateId" :auth-state="state.value" fidelity="high" />
+                </div>
+                <div class="p0b-phone-fixed-bottom">
+                  <ModuleWireframe :module="bottomNavPreviewModule" platform="mobile" :template-id="selectedTemplateId" :auth-state="state.value" fidelity="high" />
+                </div>
               </div>
-            </div>
-            <div class="p0b-phone-floating">
-              <ModuleWireframe :module="floatingPreviewModule" platform="mobile" :template-id="selectedTemplateId" :auth-state="previewAuthState" fidelity="high" />
-            </div>
-            <div class="p0b-phone-fixed-bottom">
-              <ModuleWireframe :module="bottomNavPreviewModule" platform="mobile" :template-id="selectedTemplateId" :auth-state="previewAuthState" fidelity="high" />
             </div>
           </div>
         </div>
@@ -187,6 +188,13 @@ import { NButton, NCard, NCheckbox, NEmpty, NForm, NFormItem, NInput, NModal, NS
 import { getMerchantSeed } from './data';
 import ModuleWireframe from './ModuleWireframe.vue';
 import { themeCatalog } from './themeCatalog';
+import topNav01Source from '../../../assets/topnav/Topnav-01.svg';
+import topNav02Source from '../../../assets/topnav/Topnav-02.svg';
+import topNav03Source from '../../../assets/topnav/Topnav-03.svg';
+import topNav04Source from '../../../assets/topnav/Topnav-04.svg';
+import topNav05Source from '../../../assets/topnav/Topnav-05.svg';
+import topNav06Source from '../../../assets/topnav/Topnav-06.svg';
+import topNav07Source from '../../../assets/topnav/Topnav-07.svg';
 
 type DisplayMode = 'iconText' | 'icon' | 'text';
 type AuthState = 'loggedOut' | 'loggedIn';
@@ -206,6 +214,7 @@ interface PreviewModule {
   ratio?: string;
   entryDisplayMode?: DisplayMode;
   iconVisible?: boolean;
+  referenceAsset?: string;
   buttonKeys?: string[];
   primaryButton?: 'login' | 'register';
   showAuthBar?: boolean;
@@ -256,7 +265,6 @@ const previewPassed = ref(false);
 const domain = ref(`${merchantSite || 'merchant'}.example.com`);
 const domainVerified = ref(false);
 const previewVisible = ref(false);
-const previewAuthState = ref<AuthState>('loggedOut');
 const configTab = ref<'layout' | 'venues'>('layout');
 const activeVenueId = ref('casino');
 const activeSubcategoryId = ref('popular');
@@ -287,6 +295,15 @@ const previewTopNavSourceVariantByTemplate: Record<string, string> = {
   red096Home: 'topnav04', damanHome: 'topnav02', goGameHome: 'topnav06', public3Home: 'topnav04', okwinHome2: 'topnav06',
   public5BlackGoldHome: 'topnav03', rajaHome: 'topnav02', '91club': 'topnav02', ar014: 'topnav02',
   public5WhiteGreenHome: 'topnav05', public7Home: 'topnav07',
+};
+const previewTopNavReferenceAssetByVariant: Record<string, string> = {
+  topnav01: topNav01Source,
+  topnav02: topNav02Source,
+  topnav03: topNav03Source,
+  topnav04: topNav04Source,
+  topnav05: topNav05Source,
+  topnav06: topNav06Source,
+  topnav07: topNav07Source,
 };
 const previewTopNavButtonsByTemplate: Record<string, string[]> = {
   public7Home: ['wallet', 'download', 'language'],
@@ -383,11 +400,11 @@ const previewLayoutByTemplate: Record<string, PreviewDefinition[]> = {
   ].map(([type, variant, label, detail]) => ({ type, variant, label, detail })),
   damanHome: [
     ['topNav', 'dualAuth', '頂部導航', 'Daman Nav'], ['banner', 'daman', 'Banner', 'Daman Swiper'], ['notice', 'daman', '公告提示', 'NoticeDaman'],
-    ['category', 'scene', '場館入口', 'GameScenesDaman'], ['games', 'daman', '遊戲展示', 'GameScenesDaman'], ['info', 'winner', '中獎資訊', 'Winner'], ['info', 'rank', '排行榜', 'Rank'], ['footer', 'terms', 'Footer', 'TermsDaman'], ['function', 'settingsPanel', '設定入口', 'SettingPanel'],
+    ['category', 'scene', '場館入口', 'GameScenesDaman'], ['games', 'daman', '遊戲展示', 'GameScenesDaman'], ['info', 'winner', '中獎資訊', 'Winner'], ['info', 'rank', '排行榜', 'Rank'], ['footer', 'terms', 'Footer', 'TermsDaman'],
   ].map(([type, variant, label, detail]) => ({ type, variant, label, detail })),
   goGameHome: [
     ['topNav', 'goGame', '頂部導航', 'GO Game Nav'], ['banner', 'goGame', 'Banner', 'GO Game Swiper'], ['notice', 'daman', '公告提示', 'NoticeDaman'],
-    ['category', 'scene', '場館入口', 'GameScenesDamanNew'], ['games', 'goGame', '遊戲展示', 'GameScenesDamanNew／Home'], ['footer', 'terms', 'Footer', 'TermsDamanNew'], ['function', 'settingsPanel', '設定入口', 'SettingPanel'],
+    ['category', 'scene', '場館入口', 'GameScenesDamanNew'], ['games', 'goGame', '遊戲展示', 'GameScenesDamanNew／Home'], ['footer', 'terms', 'Footer', 'TermsDamanNew'],
   ].map(([type, variant, label, detail]) => ({ type, variant, label, detail })),
   public3Home: [
     ['topNav', 'wideLogo', '頂部導航', 'Search／Wallet／通知／會員'], ['function', 'sideNav', 'PC 側邊導航', '固定入口'], ['banner', 'fullBleed', 'Banner', 'Swiper'], ['notice', 'bar', '公告列', 'NoticeBar'],
@@ -438,11 +455,14 @@ const previewModules = computed<PreviewModule[]>(() => {
     // the mapped source form instead of an invented variant.
     variant: item.type === 'topNav' ? topNavSourceVariant : item.variant,
     sourceVariant: item.type === 'topNav' ? topNavSourceVariant : undefined,
+    referenceAsset: item.type === 'topNav' ? previewTopNavReferenceAssetByVariant[topNavSourceVariant] : undefined,
     id: `preview-${selectedTemplateId.value}-${item.type}-${item.variant}-${index}`,
     gameVenues: venues.value,
     noticeIconKey: 'notice',
     ratio: item.type === 'banner' ? previewBannerRatio.value : undefined,
-    label: item.type === 'category' ? '場館入口' : item.type === 'games' ? '遊戲展示' : item.label,
+    label: item.type === 'category'
+      ? ['tabs', 'menuItem'].includes(item.variant) ? '遊戲分類' : '場館入口'
+      : item.type === 'games' ? '遊戲展示' : item.label,
     entryDisplayMode: item.type === 'category' ? 'iconText' : undefined,
     iconVisible: item.type === 'category' ? true : undefined,
     buttonKeys: item.type === 'topNav' ? topNavButtons : undefined,
@@ -477,6 +497,7 @@ const previewStyle = computed(() => ({
   '--fc-theme-background': selectedTheme.value?.background || '#f7f8ff',
   '--fc-theme-primary-button': selectedTheme.value?.primaryButton || selectedTheme.value?.buttonColor || '#009688',
 }));
+const previewFrameStyle = computed(() => ({ '--p0b-scale': String(previewScale.value) }));
 const previewPhoneStyle = computed(() => ({ ...previewStyle.value, '--p0b-scale': String(previewScale.value) }));
 const modalPhoneStyle = computed(() => ({ ...previewStyle.value, '--p0b-scale': '1' }));
 const canSubmit = computed(() => !dirty.value && previewPassed.value && Boolean(selectedTemplateId.value && themeId.value && venues.value.length && venues.value.every((venue) => venue.name && venue.subcategories.length && venue.subcategories.every((item) => item.name && item.gameIds.length))));
@@ -513,7 +534,8 @@ function goBack() { router.push({ name: 'config_layoutConfig' }); }
 function syncPreviewScale() {
   const frame = previewFrameRef.value;
   if (!frame) return;
-  previewScale.value = Math.min(frame.clientWidth / 375, frame.clientHeight / 812, 1);
+  const widthPerState = Math.max(0, (frame.clientWidth - 28) / authStates.length);
+  previewScale.value = Math.min(widthPerState / 375, frame.clientHeight / 812, 1);
 }
 
 onMounted(() => {
@@ -554,7 +576,10 @@ onBeforeUnmount(() => previewResizeObserver?.disconnect());
 .p0b-preview-card :deep(.n-card-content) { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; overflow: hidden; }
 .p0b-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .p0b-phone-wrap { display: flex; min-height: 0; flex: 1 1 auto; align-items: center; justify-content: center; overflow: hidden; padding: 8px 0; }
-.p0b-phone-frame { position: relative; width: auto; height: min(100%, 812px); aspect-ratio: 375 / 812; flex: 0 1 auto; overflow: hidden; }
+.p0b-state-grid, .p0b-modal-state-grid { display: flex; min-width: 0; min-height: 0; align-items: flex-start; justify-content: center; gap: 14px; }
+.p0b-state-preview { display: grid; min-width: 0; min-height: 0; justify-items: center; gap: 5px; }
+.p0b-state-label { color: #475569; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.p0b-phone-frame { position: relative; width: calc(375px * var(--p0b-scale, 1)); height: calc(812px * var(--p0b-scale, 1)); flex: 0 0 auto; overflow: hidden; }
 .p0b-phone-frame--modal { width: 375px; height: 812px; flex: 0 0 375px; }
 .p0b-phone { position: relative; width: 375px; height: 812px; overflow: hidden; border: 7px solid #202a33; border-radius: 24px; background: var(--p0b-background); box-shadow: 0 10px 25px rgb(15 23 42 / 14%); transform: scale(var(--p0b-scale, 1)); transform-origin: top left; }
 .p0b-phone-scroll { position: absolute; top: 0; right: 0; bottom: 56px; left: 0; overflow-x: hidden; overflow-y: auto; padding-bottom: 28px; scrollbar-width: none; }
@@ -610,6 +635,7 @@ onBeforeUnmount(() => previewResizeObserver?.disconnect());
 .p0b-game-list { max-height: 360px; overflow: auto; border-top: 1px solid #e5e7eb; }
 .p0b-game-option { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 6px; padding: 8px 4px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 13px; }
 .p0b-game-option small { color: #94a3b8; }
-.p0b-modal-preview { display: flex; max-height: calc(100vh - 190px); justify-content: center; overflow: auto; }
+.p0b-modal-preview { display: flex; max-width: calc(100vw - 48px); max-height: calc(100vh - 190px); justify-content: flex-start; overflow: auto; }
+.p0b-modal-state-grid { align-items: flex-start; gap: 18px; padding: 4px; }
 @media (max-width: 980px) { .p0b-head { align-items: flex-start; flex-direction: column; } .p0b-layout { grid-template-columns: 1fr; overflow: auto; } .p0b-preview-column { order: 2; min-height: 520px; } .p0b-config-column { min-height: 520px; } }
 </style>
