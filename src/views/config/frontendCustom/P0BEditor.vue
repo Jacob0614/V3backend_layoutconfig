@@ -62,69 +62,78 @@
       </section>
 
       <section class="p0b-config-column">
-        <n-card size="small" class="p0b-card">
-          <template #header><strong>1. 模板與主題</strong></template>
-          <n-form label-placement="top" size="small">
-            <n-form-item label="H5模板" required>
-              <n-select v-model:value="selectedTemplateId" :options="templateOptions" filterable @update:value="markDirty" />
-            </n-form-item>
-            <div v-if="currentTemplate" class="p0b-template-meta">
-              <strong>{{ currentTemplate.label }}</strong>
-              <span>站點：{{ currentTemplate.sites.join('、') || '待綁定' }}</span>
-              <span>{{ currentTemplate.structure }}</span>
-            </div>
-            <n-form-item label="主題色" required>
-              <n-select v-model:value="themeId" :options="themeOptions" filterable @update:value="markDirty" />
-            </n-form-item>
-            <div v-if="selectedTheme" class="p0b-theme-summary">
-              <span class="p0b-swatch" :style="{ background: selectedTheme.buttonColor }" />
-              <span class="p0b-swatch" :style="{ background: selectedTheme.background }" />
-              <div><strong>{{ selectedTheme.label }}</strong><span>{{ selectedTheme.designForm }}</span></div>
-            </div>
-          </n-form>
-        </n-card>
+        <n-card size="small" class="p0b-card p0b-config-card">
+          <n-tabs v-model:value="configTab" type="line" size="small" class="p0b-config-tabs">
+            <n-tab-pane name="layout" tab="版面與域名">
+              <div class="p0b-config-tab-content">
+                <section class="p0b-config-section">
+                  <div class="p0b-section-head"><strong>模板與主題</strong><span>H5</span></div>
+                  <n-form label-placement="top" size="small">
+                    <n-form-item label="模板" required>
+                      <n-select v-model:value="selectedTemplateId" :options="templateOptions" filterable @update:value="markDirty" />
+                    </n-form-item>
+                    <div v-if="currentTemplate" class="p0b-template-meta">
+                      <strong>{{ currentTemplate.label }}</strong>
+                      <span>站點：{{ currentTemplate.sites.join('、') || '待綁定' }}</span>
+                      <span>{{ currentTemplate.structure }}</span>
+                    </div>
+                    <n-form-item label="主題色" required>
+                      <n-select v-model:value="themeId" :options="themeOptions" filterable @update:value="markDirty" />
+                    </n-form-item>
+                    <div v-if="selectedTheme" class="p0b-theme-summary">
+                      <span class="p0b-swatch" :style="{ background: selectedTheme.buttonColor }" />
+                      <span class="p0b-swatch" :style="{ background: selectedTheme.background }" />
+                      <div><strong>{{ selectedTheme.label }}</strong><span>{{ selectedTheme.designForm }}</span></div>
+                    </div>
+                  </n-form>
+                </section>
 
-        <n-card size="small" class="p0b-card">
-          <template #header>
-            <div class="p0b-card-header"><strong>2. 遊戲場館規格</strong><n-button size="tiny" type="primary" @click="addVenue">新增場館</n-button></div>
-          </template>
-          <div class="p0b-helper">場館 → 子分類 → 遊戲入口。此處配置商戶源數據，前台依模板展示。</div>
-          <n-empty v-if="!venues.length" description="至少新增一個場館" size="small" />
-          <div v-for="(venue, venueIndex) in venues" :key="venue.id" class="p0b-venue-card">
-            <div class="p0b-venue-head">
-              <n-input v-model:value="venue.name" size="small" placeholder="場館名稱" @update:value="markDirty" />
-              <n-space size="small">
-                <n-button quaternary circle size="tiny" title="上移" :disabled="venueIndex === 0" @click="moveVenue(venueIndex, -1)">↑</n-button>
-                <n-button quaternary circle size="tiny" title="下移" :disabled="venueIndex === venues.length - 1" @click="moveVenue(venueIndex, 1)">↓</n-button>
-                <n-button quaternary circle size="tiny" title="刪除場館" @click="removeVenue(venueIndex)">×</n-button>
-              </n-space>
-            </div>
-            <div v-for="(subcategory, subIndex) in venue.subcategories" :key="subcategory.id" class="p0b-subcategory-row">
-              <div class="p0b-subcategory-main">
-                <n-input v-model:value="subcategory.name" size="small" placeholder="子分類名稱" @update:value="markDirty" />
-                <n-select v-model:value="subcategory.displayMode" size="small" :options="displayModeOptions" @update:value="markDirty" />
-                <n-checkbox v-model:checked="subcategory.iconVisible" @update:checked="markDirty">圖標</n-checkbox>
+                <section class="p0b-config-section">
+                  <div class="p0b-section-head"><strong>最小域名綁定</strong><span>H5 生效域名</span></div>
+                  <div class="p0b-domain-row">
+                    <n-input v-model:value="domain" size="small" placeholder="例如 h5.example.com" @update:value="markDirty" />
+                    <n-tag size="small" :type="domainVerified ? 'success' : 'warning'" :bordered="false">{{ domainVerified ? '已驗證' : '待驗證' }}</n-tag>
+                    <n-button size="small" secondary :disabled="!domain" @click="verifyDomain">驗證</n-button>
+                  </div>
+                </section>
               </div>
-              <div class="p0b-subcategory-actions">
-                <span>{{ subcategory.gameIds.length }} 個遊戲</span>
-                <n-button size="tiny" secondary @click="openGamePicker(venue.id, subcategory.id)">選擇遊戲</n-button>
-                <n-button quaternary circle size="tiny" :disabled="subIndex === 0" @click="moveSubcategory(venue, subIndex, -1)">↑</n-button>
-                <n-button quaternary circle size="tiny" :disabled="subIndex === venue.subcategories.length - 1" @click="moveSubcategory(venue, subIndex, 1)">↓</n-button>
-                <n-button quaternary circle size="tiny" title="刪除子分類" @click="removeSubcategory(venue, subIndex)">×</n-button>
-              </div>
-            </div>
-            <n-button dashed size="small" class="p0b-add-subcategory" @click="addSubcategory(venue)">＋新增子分類</n-button>
-          </div>
-        </n-card>
+            </n-tab-pane>
 
-        <n-card size="small" class="p0b-card">
-          <template #header><strong>3. 最小域名綁定</strong></template>
-          <div class="p0b-domain-row">
-            <n-input v-model:value="domain" size="small" placeholder="例如 h5.example.com" @update:value="markDirty" />
-            <n-tag size="small" :type="domainVerified ? 'success' : 'warning'" :bordered="false">{{ domainVerified ? '已驗證' : '待驗證' }}</n-tag>
-            <n-button size="small" secondary :disabled="!domain" @click="verifyDomain">驗證</n-button>
-          </div>
-          <span class="p0b-helper">P0-B 只記錄 H5 生效域名；主域名、DNS、SEO 與多域名治理後續處理。</span>
+            <n-tab-pane name="venues" tab="遊戲場館">
+              <div class="p0b-config-tab-content p0b-venue-tab-content">
+                <section class="p0b-config-section">
+                  <div class="p0b-section-head"><strong>遊戲場館</strong><n-button size="tiny" type="primary" @click="addVenue">新增場館</n-button></div>
+                  <div class="p0b-helper">場館 → 子分類 → 遊戲入口</div>
+                  <n-empty v-if="!venues.length" description="至少新增一個場館" size="small" />
+                  <div v-for="(venue, venueIndex) in venues" :key="venue.id" class="p0b-venue-card">
+                    <div class="p0b-venue-head">
+                      <n-input v-model:value="venue.name" size="small" placeholder="場館名稱" @update:value="markDirty" />
+                      <n-space size="small">
+                        <n-button quaternary circle size="tiny" title="上移" :disabled="venueIndex === 0" @click="moveVenue(venueIndex, -1)">↑</n-button>
+                        <n-button quaternary circle size="tiny" title="下移" :disabled="venueIndex === venues.length - 1" @click="moveVenue(venueIndex, 1)">↓</n-button>
+                        <n-button quaternary circle size="tiny" title="刪除場館" @click="removeVenue(venueIndex)">×</n-button>
+                      </n-space>
+                    </div>
+                    <div v-for="(subcategory, subIndex) in venue.subcategories" :key="subcategory.id" class="p0b-subcategory-row">
+                      <div class="p0b-subcategory-main">
+                        <n-input v-model:value="subcategory.name" size="small" placeholder="子分類名稱" @update:value="markDirty" />
+                        <n-select v-model:value="subcategory.displayMode" size="small" :options="displayModeOptions" @update:value="markDirty" />
+                        <n-checkbox v-model:checked="subcategory.iconVisible" @update:checked="markDirty">圖標</n-checkbox>
+                      </div>
+                      <div class="p0b-subcategory-actions">
+                        <span>{{ subcategory.gameIds.length }} 個遊戲</span>
+                        <n-button size="tiny" secondary @click="openGamePicker(venue.id, subcategory.id)">選擇遊戲</n-button>
+                        <n-button quaternary circle size="tiny" :disabled="subIndex === 0" @click="moveSubcategory(venue, subIndex, -1)">↑</n-button>
+                        <n-button quaternary circle size="tiny" :disabled="subIndex === venue.subcategories.length - 1" @click="moveSubcategory(venue, subIndex, 1)">↓</n-button>
+                        <n-button quaternary circle size="tiny" title="刪除子分類" @click="removeSubcategory(venue, subIndex)">×</n-button>
+                      </div>
+                    </div>
+                    <n-button dashed size="small" class="p0b-add-subcategory" @click="addSubcategory(venue)">＋新增子分類</n-button>
+                  </div>
+                </section>
+              </div>
+            </n-tab-pane>
+          </n-tabs>
         </n-card>
       </section>
     </div>
@@ -174,7 +183,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { NButton, NCard, NCheckbox, NEmpty, NForm, NFormItem, NInput, NModal, NSelect, NSpace, NTag, useMessage } from 'naive-ui';
+import { NButton, NCard, NCheckbox, NEmpty, NForm, NFormItem, NInput, NModal, NSelect, NSpace, NTabPane, NTabs, NTag, useMessage } from 'naive-ui';
 import { getMerchantSeed } from './data';
 import ModuleWireframe from './ModuleWireframe.vue';
 import { themeCatalog } from './themeCatalog';
@@ -248,6 +257,7 @@ const domain = ref(`${merchantSite || 'merchant'}.example.com`);
 const domainVerified = ref(false);
 const previewVisible = ref(false);
 const previewAuthState = ref<AuthState>('loggedOut');
+const configTab = ref<'layout' | 'venues'>('layout');
 const activeVenueId = ref('casino');
 const activeSubcategoryId = ref('popular');
 const previewFrameRef = ref<HTMLElement | null>(null);
@@ -525,10 +535,21 @@ onBeforeUnmount(() => previewResizeObserver?.disconnect());
 .p0b-title-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
 .p0b-title-row h1 { margin: 0; font-size: 20px; }
 .p0b-head p { margin: 5px 0 0; color: #6b7280; font-size: 13px; }
-.p0b-layout { display: grid; min-height: 0; flex: 1 1 auto; grid-template-columns: minmax(360px, 0.85fr) minmax(520px, 1.15fr); gap: 12px; align-items: stretch; overflow: hidden; }
+.p0b-layout { display: grid; min-height: 0; flex: 1 1 auto; grid-template-columns: minmax(440px, 1.08fr) minmax(390px, 0.92fr); gap: 12px; align-items: stretch; overflow: hidden; }
 .p0b-preview-column, .p0b-config-column { min-height: 0; }
-.p0b-config-column { overflow: auto; padding-right: 2px; }
+.p0b-config-column { min-width: 0; overflow: hidden; padding-right: 2px; }
 .p0b-preview-card, .p0b-card { border-radius: 4px; }
+.p0b-config-card { display: flex; height: 100%; min-height: 0; flex-direction: column; }
+.p0b-config-card :deep(.n-card__content) { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; padding: 0 14px 12px; overflow: hidden; }
+.p0b-config-tabs { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; }
+.p0b-config-tabs :deep(.n-tabs-nav) { flex: 0 0 auto; }
+.p0b-config-tabs :deep(.n-tab-pane) { height: 100%; min-height: 0; padding-top: 8px; overflow: auto; }
+.p0b-config-tab-content { display: grid; gap: 12px; }
+.p0b-config-section { min-width: 0; padding-bottom: 12px; border-bottom: 1px solid #eef2f3; }
+.p0b-section-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; color: #1f2937; font-size: 13px; }
+.p0b-section-head > span { color: #94a3b8; font-size: 11px; }
+.p0b-venue-tab-content { min-height: 100%; }
+.p0b-venue-tab-content .p0b-config-section { padding-bottom: 0; border-bottom: 0; }
 .p0b-preview-card { display: flex; height: 100%; flex-direction: column; }
 .p0b-preview-card :deep(.n-card-content) { display: flex; min-height: 0; flex: 1 1 auto; flex-direction: column; overflow: hidden; }
 .p0b-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -569,12 +590,12 @@ onBeforeUnmount(() => previewResizeObserver?.disconnect());
 .p0b-bottom-nav span { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 17px; line-height: 1; }
 .p0b-bottom-nav small { color: #64748b; font-size: 9px; }
 .p0b-preview-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.p0b-template-meta { display: grid; gap: 3px; margin: -3px 0 12px; padding: 8px 10px; border-left: 3px solid #0f9d91; background: #f7faf9; }
+.p0b-template-meta { display: grid; gap: 3px; margin: -3px 0 10px; padding: 7px 9px; border-left: 3px solid #0f9d91; background: #f7faf9; }
 .p0b-theme-summary { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 3px; background: #fafafa; }
 .p0b-swatch { width: 20px; height: 20px; border: 1px solid rgb(15 23 42 / 10%); border-radius: 3px; }
 .p0b-theme-summary div { display: grid; gap: 2px; margin-left: 4px; font-size: 11px; }
 .p0b-theme-summary span { color: #6b7280; }
-.p0b-venue-card { display: grid; gap: 8px; margin-top: 10px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 4px; }
+.p0b-venue-card { display: grid; gap: 8px; margin-top: 8px; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px; }
 .p0b-venue-head, .p0b-subcategory-main, .p0b-subcategory-actions, .p0b-domain-row, .p0b-game-filters { display: flex; align-items: center; gap: 7px; }
 .p0b-venue-head .n-input { flex: 1; }
 .p0b-subcategory-row { display: grid; gap: 6px; padding: 8px; border: 1px solid #eef2f3; border-radius: 3px; background: #fbfdfd; }
@@ -590,5 +611,5 @@ onBeforeUnmount(() => previewResizeObserver?.disconnect());
 .p0b-game-option { display: grid; grid-template-columns: 24px 1fr auto; align-items: center; gap: 6px; padding: 8px 4px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 13px; }
 .p0b-game-option small { color: #94a3b8; }
 .p0b-modal-preview { display: flex; max-height: calc(100vh - 190px); justify-content: center; overflow: auto; }
-@media (max-width: 980px) { .p0b-head { align-items: flex-start; flex-direction: column; } .p0b-layout { grid-template-columns: 1fr; } .p0b-preview-column { order: 2; } }
+@media (max-width: 980px) { .p0b-head { align-items: flex-start; flex-direction: column; } .p0b-layout { grid-template-columns: 1fr; overflow: auto; } .p0b-preview-column { order: 2; min-height: 520px; } .p0b-config-column { min-height: 520px; } }
 </style>
